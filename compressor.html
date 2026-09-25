@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoramento de Compressor de Ar | Optigrid Industrial</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- MQTT.js via CDN -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav id="mainNavbar" class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4 transition-bg">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="index.html">
+                <img src="logo.png" alt="Logo Optigrid" height="50"
+                    class="d-inline-block align-text-top">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+                aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="cadastro.html">Cadastro</a>
+                    </li>
+                     <li class="nav-item">
+                        <a class="nav-link" href="quem_somos.html">Quem nós somos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link " aria-current="page" href="index.html">Home Sala</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="iluminaçao.html">Iluminação</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="estatitica.html">Analytics Sala</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="compressor.html">Compressor de Ar</a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
+                    <!-- Status MQTT Indicator -->
+                    <span id="mqttStatusBadge" class="badge bg-danger">MQTT Desconectado</span>
+
+                    <button id="darkModeToggle" class="btn btn-outline-light btn-sm rounded-circle p-2"
+                        title="Alternar Modo Escuro" style="width: 38px; height: 38px;">
+                        <i id="themeIcon" class="bi bi-moon-stars-fill"></i>
+                    </button>
+
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+                            id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="https://github.com/mdo.png" alt="Avatar" width="32" height="32"
+                                class="rounded-circle me-2 border border-warning">
+                            <div class="text-start d-none d-sm-block">
+                                <span class="d-block fw-bold small lh-1">Carlos Silva</span>
+                                <span class="text-warning" style="font-size: 0.75rem;">Administrador</span>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end text-small shadow" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="perfil.html"><i class="bi bi-person-circle me-2"></i> Meu Perfil</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i> Configurações</a></li>
+                            <li><a class="dropdown-item" href="logs.html"><i class="bi bi-activity me-2"></i> Logs de Atividade</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-box-arrow-right me-2"></i> Sair da Conta</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+
+        <!-- CABEÇALHO -->
+        <div class="row mb-4 align-items-center">
+            <div class="col-lg-8">
+                <h2 class="fw-bold mb-1"><i class="bi bi-gear-wide-connected text-primary"></i> Central de
+                    Monitoramento: Compressor Principal (CP-01)</h2>
+                <p class="text-muted mb-0">Controle de estado operacional, telemetria de pressão, vazão volumétrica e integridade térmica via MQTT.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <span class="badge bg-success p-2 fs-6 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Sistema Operacional Conectado</span>
+            </div>
+        </div>
+
+        <!-- CARDS DE TELEMETRIA PRINCIPAL -->
+        <div class="row g-4 mb-4">
+
+            <!-- PRESSÃO INTERNA -->
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h6 class="text-muted fw-semibold mb-0">Pressão Interna</h6>
+                            <div class="bg-primary bg-opacity-10 p-2 rounded-circle text-primary">
+                                <i class="bi bi-speedometer fs-4"></i>
+                            </div>
+                        </div>
+                        <h2 class="fw-bold mb-1" id="pressaoDisplay">0.0 <span class="fs-5 text-muted">Bar</span></h2>
+                        <div class="progress" style="height: 6px;">
+                            <div id="pressaoBar" class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <span class="text-muted small mt-2 d-block" id="faixaPressaoText">Meta de corte: 15.0 Bar</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VAZÃO DE AR -->
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h6 class="text-muted fw-semibold mb-0">Vazão de Ar</h6>
+                            <div class="bg-success bg-opacity-10 p-2 rounded-circle text-success">
+                                <i class="bi bi-wind fs-4"></i>
+                            </div>
+                        </div>
+                        <h2 class="fw-bold mb-1" id="vazaoDisplay">0.0 <span class="fs-5 text-muted">m³/h</span></h2>
+                        <div class="progress" style="height: 6px;">
+                            <div id="vazaoBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <span class="text-muted small mt-2 d-block">Capacidade nominal: 60 m³/h</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TEMPERATURA DO ÓLEO -->
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h6 class="text-muted fw-semibold mb-0">Temp. Óleo / Motor</h6>
+                            <div class="bg-warning bg-opacity-10 p-2 rounded-circle text-warning">
+                                <i class="bi bi-thermometer-half fs-4"></i>
+                            </div>
+                        </div>
+                        <h2 class="fw-bold mb-1" id="tempDisplay">0.0 <span class="fs-5 text-muted">°C</span></h2>
+                        <div class="progress" style="height: 6px;">
+                            <div id="tempBar" class="progress-bar bg-warning" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <span class="text-muted small mt-2 d-block">Limite máximo: 95°C</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DETECÇÃO DE VAZAMENTO & HORÍMETRO -->
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h6 class="text-muted fw-semibold mb-0">Status de Vazamento</h6>
+                            <div id="leakIconContainer" class="bg-success bg-opacity-10 p-2 rounded-circle text-success">
+                                <i id="leakIcon" class="bi bi-shield-check fs-4"></i>
+                            </div>
+                        </div>
+                        <h5 class="fw-bold mb-1" id="leakStatusText">Nenhum Vazamento</h5>
+                        <span id="leakSubText" class="text-success small fw-semibold d-block mt-2"><i class="bi bi-check-circle"></i> Rede pressurizada estável</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- SEÇÃO DE CONTROLE E GRÁFICO -->
+        <div class="row g-4">
+
+            <!-- PAINEL DE CONTROLE DO COMPRESSOR -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100 bg-dark text-white">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex align-items-center justify-content-between mb-4">
+                                <h5 class="fw-bold m-0"><i class="bi bi-cpu text-warning me-2"></i> Painel de Acionamento</h5>
+                                <i id="compIcon" class="bi bi-power fs-2 text-success" style="transition: color 0.3s;"></i>
+                            </div>
+
+                            <div class="mb-3">
+                                <span class="text-light small d-block mb-1">Estado Atual do Motor:</span>
+                                <h3 id="compStatusBadge" class="badge bg-success fs-5 p-2 px-3 m-0">AGUARDANDO...</h3>
+                            </div>
+
+                            <!-- CONFIGURAÇÃO DE MODO E BAR -->
+                            <div class="mb-3">
+                                <label for="compressorMode" class="form-label text-light small fw-semibold">Modo de Operação:</label>
+                                <select id="compressorMode" class="form-select form-select-sm bg-secondary text-white border-0 mb-2">
+                                    <option value="parafuso" selected>Compressor de Parafuso</option>
+                                    <option value="alternador">Compressor Alternador</option>
+                                </select>
+
+                                <label for="targetBarInput" class="form-label text-light small fw-semibold">Meta de Desligamento (BAR):</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" id="targetBarInput" class="form-control bg-secondary text-white border-0" value="15" min="1" max="30">
+                                    <span class="input-group-text bg-secondary text-light border-0">BAR</span>
+                                </div>
+                            </div>
+
+                            <!-- CONTROLE DO SECADOR -->
+                            <div class="mb-3 p-2 bg-secondary bg-opacity-25 rounded d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="d-block text-light fw-semibold small">Secador de Ar</span>
+                                    <span id="dryerStatusText" class="text-success small">Ligado</span>
+                                </div>
+                                <button id="dryerToggleBtn" class="btn btn-sm btn-outline-success">Desligar Secador</button>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button id="compToggleBtn" class="btn btn-danger btn-lg fw-bold shadow-sm">
+                                <i class="bi bi-stop-circle me-1"></i> Desligar Compressor
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRÁFICO DE PRESSÃO E VAZÃO EM TEMPO REAL -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="card-title fw-bold m-0"><i class="bi bi-graph-up-arrow text-primary me-2"></i> Dinâmica de Pressão (Bar) vs Vazão (m³/h)</h5>
+                        <span class="badge bg-body-secondary text-body border">Tempo Real MQTT</span>
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <div style="height: 250px;">
+                            <canvas id="compressorChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- SEÇÃO DE COMANDOS AUXILIARES E MANUTENÇÃO -->
+        <div class="row g-4 mt-1">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header py-3">
+                        <h5 class="card-title fw-bold m-0"><i class="bi bi-tools text-secondary me-2"></i> Comandos Auxiliares & Manutenção</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-primary w-100 py-2 fw-semibold" id="btnPurge">
+                                    <i class="bi bi-droplet-fill me-1"></i> Executar Purga de Condensado
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-warning w-100 py-2 fw-semibold" id="btnValveTest">
+                                    <i class="bi bi-shield-exclamation me-1"></i> Testar Válvula de Segurança
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-danger w-100 py-2 fw-semibold" id="btnSimulateLeak">
+                                    <i class="bi bi-exclamation-triangle me-1"></i> Simular Sensor de Vazamento
+                                </button>
+                            </div>
+                        </div>
+                        <div id="actionFeedback" class="alert alert-info mt-3 mb-0 d-none shadow-sm" role="alert">
+                            <i class="bi bi-info-circle-fill me-2"></i> <span id="feedbackText">Comando executado com sucesso.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- SCRIPT DE TEMA -->
+    <script>
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const htmlElement = document.documentElement;
+
+        function setTheme(theme) {
+            htmlElement.setAttribute('data-bs-theme', theme);
+            localStorage.setItem('theme', theme);
+            themeIcon.className = theme === 'dark' ? "bi bi-sun-fill text-warning" : "bi bi-moon-stars-fill";
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        setTheme(savedTheme);
+
+        darkModeToggle.addEventListener('click', () => {
+            const currentTheme = htmlElement.getAttribute('data-bs-theme');
+            setTheme(currentTheme === 'light' ? 'dark' : 'light');
+        });
+    </script>
+
+    <!-- CONFIGURAÇÃO DO GRÁFICO -->
+    <script>
+        const ctxComp = document.getElementById('compressorChart').getContext('2d');
+        const compressorChart = new Chart(ctxComp, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Pressão (Bar)',
+                    data: [],
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.3,
+                    fill: true,
+                    yAxisID: 'y'
+                }, {
+                    label: 'Vazão (m³/h)',
+                    data: [],
+                    borderColor: '#198754',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    borderDash: [4, 4],
+                    tension: 0.3,
+                    yAxisID: 'y1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { type: 'linear', display: true, position: 'left', min: 0, max: 20, title: { display: true, text: 'Pressão (Bar)' } },
+                    y1: { type: 'linear', display: true, position: 'right', min: 0, max: 80, grid: { drawOnChartArea: false }, title: { display: true, text: 'Vazão (m³/h)' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    </script>
+
+    <!-- LÓGICA MQTT E ATUALIZAÇÃO DA INTERFACE -->
+    <script>
+        // Configuração do Broker MQTT (ex: HiveMQ public broker via WebSocket)
+        const MQTT_BROKER = 'wss://broker.hivemq.com:8884/mqtt';
+        const TOPIC_TELEMETRIA = 'optigrid/compressor/cp01/telemetria';
+        const TOPIC_COMANDO = 'optigrid/compressor/cp01/comando';
+
+        const mqttStatusBadge = document.getElementById('mqttStatusBadge');
+        
+        // Elementos de UI
+        const compToggleBtn = document.getElementById('compToggleBtn');
+        const compStatusBadge = document.getElementById('compStatusBadge');
+        const compIcon = document.getElementById('compIcon');
+        const compressorMode = document.getElementById('compressorMode');
+        const targetBarInput = document.getElementById('targetBarInput');
+        const faixaPressaoText = document.getElementById('faixaPressaoText');
+
+        const dryerToggleBtn = document.getElementById('dryerToggleBtn');
+        const dryerStatusText = document.getElementById('dryerStatusText');
+
+        const pressaoDisplay = document.getElementById('pressaoDisplay');
+        const pressaoBar = document.getElementById('pressaoBar');
+        const vazaoDisplay = document.getElementById('vazaoDisplay');
+        const vazaoBar = document.getElementById('vazaoBar');
+        const tempDisplay = document.getElementById('tempDisplay');
+        const tempBar = document.getElementById('tempBar');
+
+        const leakIconContainer = document.getElementById('leakIconContainer');
+        const leakIcon = document.getElementById('leakIcon');
+        const leakStatusText = document.getElementById('leakStatusText');
+        const leakSubText = document.getElementById('leakSubText');
+        
+        const actionFeedback = document.getElementById('actionFeedback');
+        const feedbackText = document.getElementById('feedbackText');
+
+        function showFeedback(msg) {
+            feedbackText.textContent = msg;
+            actionFeedback.classList.remove('d-none');
+            setTimeout(() => {
+                actionFeedback.classList.add('d-none');
+            }, 5000);
+        }
+
+        // Conexão MQTT
+        console.log("Conectando ao broker MQTT...");
+        const client = mqtt.connect(MQTT_BROKER);
+
+        client.on('connect', () => {
+            mqttStatusBadge.textContent = "MQTT Conectado";
+            mqttStatusBadge.className = "badge bg-success";
+            console.log("Conectado com sucesso ao broker MQTT!");
+            client.subscribe(TOPIC_TELEMETRIA, (err) => {
+                if (!err) {
+                    console.log(`Inscrito no tópico: ${TOPIC_TELEMETRIA}`);
+                }
+            });
+        });
+
+        client.on('error', (err) => {
+            mqttStatusBadge.textContent = "Erro MQTT";
+            mqttStatusBadge.className = "badge bg-danger";
+            console.log("Erro de conexão MQTT: ", err);
+        });
+
+        // Recebimento de mensagens via MQTT (Telemetria do ESP32 / Backend)
+        client.on('message', (topic, payload) => {
+            if (topic === TOPIC_TELEMETRIA) {
+                try {
+                    const data = JSON.parse(payload.toString());
+                    
+                    // Atualiza Pressão
+                    let pressao = data.pressao || 0;
+                    let maxBar = parseFloat(targetBarInput.value) || 15;
+                    pressaoDisplay.innerHTML = `${pressao.toFixed(1)} <span class="fs-5 text-muted">Bar</span>`;
+                    pressaoBar.style.width = Math.min((pressao / maxBar) * 100, 100) + '%';
+
+                    // Atualiza Vazão
+                    let vazao = data.vazao || 0;
+                    vazaoDisplay.innerHTML = `${vazao.toFixed(1)} <span class="fs-5 text-muted">m³/h</span>`;
+                    vazaoBar.style.width = Math.min((vazao / 60) * 100, 100) + '%';
+
+                    // Atualiza Temperatura
+                    let temp = data.temperatura || 25;
+                    tempDisplay.innerHTML = `${temp.toFixed(1)} <span class="fs-5 text-muted">°C</span>`;
+                    tempBar.style.width = Math.min((temp / 95) * 100, 100) + '%';
+
+                    // Atualiza Status do Compressor
+                    if (data.statusCompressor) {
+                        compStatusBadge.textContent = data.statusCompressor;
+                        compStatusBadge.className = "badge bg-success fs-5 p-2 px-3 m-0";
+                        compIcon.className = "bi bi-power fs-2 text-success";
+                    } else {
+                        compStatusBadge.textContent = "DESLIGADO";
+                        compStatusBadge.className = "badge bg-secondary fs-5 p-2 px-3 m-0";
+                        compIcon.className = "bi bi-power fs-2 text-danger";
+                    }
+
+                    // Atualiza Vazamento
+                    if (data.vazamento) {
+                        leakIconContainer.className = "bg-danger bg-opacity-10 p-2 rounded-circle text-danger";
+                        leakIcon.className = "bi bi-exclamation-triangle-fill fs-4";
+                        leakStatusText.textContent = "Vazamento Detectado!";
+                        leakStatusText.className = "text-danger fw-bold mb-1";
+                        leakSubText.innerHTML = '<i class="bi bi-x-circle"></i> Queda anômala na linha';
+                    } else {
+                        leakIconContainer.className = "bg-success bg-opacity-10 p-2 rounded-circle text-success";
+                        leakIcon.className = "bi bi-shield-check fs-4";
+                        leakStatusText.textContent = "Nenhum Vazamento";
+                        leakStatusText.className = "text-success fw-bold mb-1";
+                        leakSubText.innerHTML = '<i class="bi bi-check-circle"></i> Rede pressurizada estável';
+                    }
+
+                    // Atualiza o Gráfico em Tempo Real
+                    const horaAtual = new Date().toLocaleTimeString();
+                    if (compressorChart.data.labels.length > 10) {
+                        compressorChart.data.labels.shift();
+                        compressorChart.data.datasets[0].data.shift();
+                        compressorChart.data.datasets[1].data.shift();
+                    }
+                    compressorChart.data.labels.push(horaAtual);
+                    compressorChart.data.datasets[0].data.push(pressao);
+                    compressorChart.data.datasets[1].data.push(vazao);
+                    compressorChart.update();
+
+                } catch (e) {
+                    console.error("Erro ao processar JSON da mensagem MQTT:", e);
+                }
+            }
+        });
+
+        // Função auxiliar para enviar comandos via MQTT
+        function enviarComandoMQTT(acao, valor) {
+            const payload = JSON.stringify({ comando: acao, valor: valor, timestamp: Date.now() });
+            client.publish(TOPIC_COMANDO, payload, {}, (err) => {
+                if (err) {
+                    showFeedback("Erro ao enviar comando MQTT.");
+                } else {
+                    showFeedback(`Comando enviado: ${acao} (${valor})`);
+                }
+            });
+        }
+
+        // Event Listeners para Enviar Comandos
+        compToggleBtn.addEventListener('click', function () {
+            const estadoDesejado = compStatusBadge.textContent.includes("DESLIGADO") ? "ligar" : "desligar";
+            enviarComandoMQTT("toggle_compressor", estadoDesejado);
+        });
+
+        dryerToggleBtn.addEventListener('click', () => {
+            const estadoSecador = dryerStatusText.textContent === "Ligado" ? "desligar_secador" : "ligar_secador";
+            enviarComandoMQTT("toggle_secador", estadoSecador);
+        });
+
+        document.getElementById('btnPurge').addEventListener('click', () => {
+            enviarComandoMQTT("executar_purga", true);
+        });
+
+        document.getElementById('btnValveTest').addEventListener('click', () => {
+            enviarComandoMQTT("testar_valvula", true);
+        });
+
+        document.getElementById('btnSimulateLeak').addEventListener('click', () => {
+            enviarComandoMQTT("simular_vazamento", true);
+        });
+    </script>
+</body>
+
+</html>
