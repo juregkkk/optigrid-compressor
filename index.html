@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-bs-theme="light">
 
 <head>
     <meta charset="UTF-8">
@@ -9,31 +9,54 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <!-- MQTT.js via CDN -->
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <style>
+        body {
+            overflow-x: hidden;
+        }
+    </style>
 </head>
 
 <body>
 
-    <!-- NAVBAR -
+    <!-- NAVBAR RESPONSIVA COM BOTÃO DE TEMA FUNCIONAL -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom mb-4 shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="#">
+                <i class="bi bi-gear-wide-connected me-1"></i> Optigrid Industrial
+            </a>
+            <div class="ms-auto d-flex align-items-center gap-2">
+                <!-- Status MQTT -->
+                <span id="mqttStatusBadge" class="badge bg-warning text-dark px-3 py-2">Conectando MQTT...</span>
+                <!-- Botão de Tema (Dark/Light Mode) -->
+                <button id="darkModeToggle" class="btn btn-outline-secondary btn-sm" title="Alternar Tema">
+                    <i id="themeIcon" class="bi bi-moon-stars-fill"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
 
     <div class="container pb-5">
 
         <!-- CABEÇALHO -->
-        <div class="row mb-4 align-items-center">
-            <div class="col-lg-8">
-                <h2 class="fw-bold mb-1"><i class="bi bi-gear-wide-connected text-primary"></i> Central de
-                    Monitoramento: Compressor Principal (CP-01)</h2>
-                <p class="text-muted mb-0">Controle de estado operacional, telemetria de pressão, vazão volumétrica e integridade térmica via MQTT.</p>
+        <div class="row mb-4 align-items-center g-3">
+            <div class="col-12 col-lg-8">
+                <h2 class="fw-bold mb-1 fs-3 fs-lg-2">
+                    <i class="bi bi-cpu text-primary"></i> Central: Compressor (CP-01)
+                </h2>
+                <p class="text-muted mb-0 small">Controle de estado, telemetria de pressão, vazão e integridade térmica via MQTT.</p>
             </div>
-            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                <span class="badge bg-success p-2 fs-6 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Sistema Operacional Conectado</span>
+            <div class="col-12 col-lg-4 text-lg-end">
+                <span class="badge bg-success p-2 fs-6 shadow-sm w-100 w-lg-auto d-inline-block">
+                    <i class="bi bi-check-circle-fill me-1"></i> Sistema Operacional Conectado
+                </span>
             </div>
         </div>
 
         <!-- CARDS DE TELEMETRIA PRINCIPAL -->
-        <div class="row g-4 mb-4">
+        <div class="row g-3 mb-4">
 
             <!-- PRESSÃO INTERNA -->
-            <div class="col-md-3">
+            <div class="col-12 col-md-6 col-xl-3">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -52,7 +75,7 @@
             </div>
 
             <!-- VAZÃO DE AR -->
-            <div class="col-md-3">
+            <div class="col-12 col-md-6 col-xl-3">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -71,7 +94,7 @@
             </div>
 
             <!-- TEMPERATURA DO ÓLEO -->
-            <div class="col-md-3">
+            <div class="col-12 col-md-6 col-xl-3">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -89,8 +112,8 @@
                 </div>
             </div>
 
-            <!-- DETECÇÃO DE VAZAMENTO & HORÍMETRO -->
-            <div class="col-md-3">
+            <!-- DETECÇÃO DE VAZAMENTO -->
+            <div class="col-12 col-md-6 col-xl-3">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -111,9 +134,9 @@
         <div class="row g-4">
 
             <!-- PAINEL DE CONTROLE DO COMPRESSOR -->
-            <div class="col-lg-4">
+            <div class="col-12 col-lg-4">
                 <div class="card border-0 shadow-sm h-100 bg-dark text-white">
-                    <div class="card-body d-flex flex-column justify-content-between">
+                    <div class="card-body d-flex flex-column justify-content-between p-4">
                         <div>
                             <div class="d-flex align-items-center justify-content-between mb-4">
                                 <h5 class="fw-bold m-0"><i class="bi bi-cpu text-warning me-2"></i> Painel de Acionamento</h5>
@@ -150,7 +173,7 @@
                             </div>
                         </div>
 
-                        <div class="d-grid gap-2">
+                        <div class="d-grid gap-2 mt-3">
                             <button id="compToggleBtn" class="btn btn-danger btn-lg fw-bold shadow-sm">
                                 <i class="bi bi-stop-circle me-1"></i> Desligar Compressor
                             </button>
@@ -160,14 +183,14 @@
             </div>
 
             <!-- GRÁFICO DE PRESSÃO E VAZÃO EM TEMPO REAL -->
-            <div class="col-lg-8">
+            <div class="col-12 col-lg-8">
                 <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                        <h5 class="card-title fw-bold m-0"><i class="bi bi-graph-up-arrow text-primary me-2"></i> Dinâmica de Pressão (Bar) vs Vazão (m³/h)</h5>
-                        <span class="badge bg-body-secondary text-body border">Tempo Real MQTT</span>
+                    <div class="card-header py-3 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+                        <h5 class="card-title fw-bold m-0 fs-6 fs-sm-5"><i class="bi bi-graph-up-arrow text-primary me-2"></i> Pressão (Bar) vs Vazão (m³/h)</h5>
+                        <span class="badge bg-body-secondary text-body border align-self-start align-self-sm-auto">Tempo Real MQTT</span>
                     </div>
                     <div class="card-body d-flex flex-column justify-content-center">
-                        <div style="height: 250px;">
+                        <div style="position: relative; height: 260px; width: 100%;">
                             <canvas id="compressorChart"></canvas>
                         </div>
                     </div>
@@ -185,17 +208,17 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-md-4">
+                            <div class="col-12 col-md-4">
                                 <button class="btn btn-outline-primary w-100 py-2 fw-semibold" id="btnPurge">
                                     <i class="bi bi-droplet-fill me-1"></i> Executar Purga de Condensado
                                 </button>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-12 col-md-4">
                                 <button class="btn btn-outline-warning w-100 py-2 fw-semibold" id="btnValveTest">
                                     <i class="bi bi-shield-exclamation me-1"></i> Testar Válvula de Segurança
                                 </button>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-12 col-md-4">
                                 <button class="btn btn-outline-danger w-100 py-2 fw-semibold" id="btnSimulateLeak">
                                     <i class="bi bi-exclamation-triangle me-1"></i> Simular Sensor de Vazamento
                                 </button>
@@ -215,7 +238,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- SCRIPT DE TEMA -->
+    <!-- SCRIPT DE TEMA (MODO ESCURO/CLARO) -->
     <script>
         const darkModeToggle = document.getElementById('darkModeToggle');
         const themeIcon = document.getElementById('themeIcon');
@@ -224,12 +247,15 @@
         function setTheme(theme) {
             htmlElement.setAttribute('data-bs-theme', theme);
             localStorage.setItem('theme', theme);
+            // Altera o ícone do botão dependendo do tema ativo
             themeIcon.className = theme === 'dark' ? "bi bi-sun-fill text-warning" : "bi bi-moon-stars-fill";
         }
 
+        // Carrega o tema salvo no navegador ou define 'light' como padrão
         const savedTheme = localStorage.getItem('theme') || 'light';
         setTheme(savedTheme);
 
+        // Evento de clique no botão de alternância
         darkModeToggle.addEventListener('click', () => {
             const currentTheme = htmlElement.getAttribute('data-bs-theme');
             setTheme(currentTheme === 'light' ? 'dark' : 'light');
@@ -277,14 +303,12 @@
 
     <!-- LÓGICA MQTT E ATUALIZAÇÃO DA INTERFACE -->
     <script>
-        // Configuração do Broker MQTT (ex: HiveMQ public broker via WebSocket)
         const MQTT_BROKER = 'wss://broker.hivemq.com:8884/mqtt';
         const TOPIC_TELEMETRIA = 'optigrid/compressor/cp01/telemetria';
         const TOPIC_COMANDO = 'optigrid/compressor/cp01/comando';
 
         const mqttStatusBadge = document.getElementById('mqttStatusBadge');
         
-        // Elementos de UI
         const compToggleBtn = document.getElementById('compToggleBtn');
         const compStatusBadge = document.getElementById('compStatusBadge');
         const compIcon = document.getElementById('compIcon');
@@ -318,13 +342,12 @@
             }, 5000);
         }
 
-        // Conexão MQTT
         console.log("Conectando ao broker MQTT...");
         const client = mqtt.connect(MQTT_BROKER);
 
         client.on('connect', () => {
             mqttStatusBadge.textContent = "MQTT Conectado";
-            mqttStatusBadge.className = "badge bg-success";
+            mqttStatusBadge.className = "badge bg-success px-3 py-2";
             console.log("Conectado com sucesso ao broker MQTT!");
             client.subscribe(TOPIC_TELEMETRIA, (err) => {
                 if (!err) {
@@ -335,33 +358,28 @@
 
         client.on('error', (err) => {
             mqttStatusBadge.textContent = "Erro MQTT";
-            mqttStatusBadge.className = "badge bg-danger";
+            mqttStatusBadge.className = "badge bg-danger px-3 py-2";
             console.log("Erro de conexão MQTT: ", err);
         });
 
-        // Recebimento de mensagens via MQTT (Telemetria do ESP32 / Backend)
         client.on('message', (topic, payload) => {
             if (topic === TOPIC_TELEMETRIA) {
                 try {
                     const data = JSON.parse(payload.toString());
                     
-                    // Atualiza Pressão
                     let pressao = data.pressao || 0;
                     let maxBar = parseFloat(targetBarInput.value) || 15;
                     pressaoDisplay.innerHTML = `${pressao.toFixed(1)} <span class="fs-5 text-muted">Bar</span>`;
                     pressaoBar.style.width = Math.min((pressao / maxBar) * 100, 100) + '%';
 
-                    // Atualiza Vazão
                     let vazao = data.vazao || 0;
                     vazaoDisplay.innerHTML = `${vazao.toFixed(1)} <span class="fs-5 text-muted">m³/h</span>`;
                     vazaoBar.style.width = Math.min((vazao / 60) * 100, 100) + '%';
 
-                    // Atualiza Temperatura
                     let temp = data.temperatura || 25;
                     tempDisplay.innerHTML = `${temp.toFixed(1)} <span class="fs-5 text-muted">°C</span>`;
                     tempBar.style.width = Math.min((temp / 95) * 100, 100) + '%';
 
-                    // Atualiza Status do Compressor
                     if (data.statusCompressor) {
                         compStatusBadge.textContent = data.statusCompressor;
                         compStatusBadge.className = "badge bg-success fs-5 p-2 px-3 m-0";
@@ -372,7 +390,6 @@
                         compIcon.className = "bi bi-power fs-2 text-danger";
                     }
 
-                    // Atualiza Vazamento
                     if (data.vazamento) {
                         leakIconContainer.className = "bg-danger bg-opacity-10 p-2 rounded-circle text-danger";
                         leakIcon.className = "bi bi-exclamation-triangle-fill fs-4";
@@ -387,7 +404,6 @@
                         leakSubText.innerHTML = '<i class="bi bi-check-circle"></i> Rede pressurizada estável';
                     }
 
-                    // Atualiza o Gráfico em Tempo Real
                     const horaAtual = new Date().toLocaleTimeString();
                     if (compressorChart.data.labels.length > 10) {
                         compressorChart.data.labels.shift();
@@ -405,7 +421,6 @@
             }
         });
 
-        // Função auxiliar para enviar comandos via MQTT
         function enviarComandoMQTT(acao, valor) {
             const payload = JSON.stringify({ comando: acao, valor: valor, timestamp: Date.now() });
             client.publish(TOPIC_COMANDO, payload, {}, (err) => {
@@ -417,7 +432,6 @@
             });
         }
 
-        // Event Listeners para Enviar Comandos
         compToggleBtn.addEventListener('click', function () {
             const estadoDesejado = compStatusBadge.textContent.includes("DESLIGADO") ? "ligar" : "desligar";
             enviarComandoMQTT("toggle_compressor", estadoDesejado);
