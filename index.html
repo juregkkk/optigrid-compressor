@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-bs-theme="light">
-
+<html lang="pt-BR">
+ 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,54 +9,34 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <!-- MQTT.js via CDN -->
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-    <style>
-        body {
-            overflow-x: hidden;
-        }
-    </style>
 </head>
-
+ 
 <body>
-
-    <!-- NAVBAR RESPONSIVA COM BOTÃO DE TEMA FUNCIONAL -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom mb-4 shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold text-primary" href="#">
-                <i class="bi bi-gear-wide-connected me-1"></i> Optigrid Industrial
-            </a>
-            <div class="ms-auto d-flex align-items-center gap-2">
-                <!-- Status MQTT -->
-                <span id="mqttStatusBadge" class="badge bg-warning text-dark px-3 py-2">Conectando MQTT...</span>
-                <!-- Botão de Tema (Dark/Light Mode) -->
-                <button id="darkModeToggle" class="btn btn-outline-secondary btn-sm" title="Alternar Tema">
+ 
+    <div class="container py-4 pb-5">
+ 
+        <!-- CABEÇALHO -->
+        <div class="row mb-4 align-items-center">
+            <div class="col-lg-7">
+                <h2 class="fw-bold mb-1"><i class="bi bi-gear-wide-connected text-primary"></i> Central de
+                    Monitoramento: Compressor Principal (CP-01)</h2>
+                <p class="text-muted mb-0">Controle de estado operacional, telemetria de pressão, vazão volumétrica e integridade térmica via MQTT.</p>
+            </div>
+            <div class="col-lg-5 text-lg-end mt-3 mt-lg-0 d-flex flex-wrap align-items-center justify-content-lg-end gap-2">
+                <span id="mqttStatusBadge" class="badge bg-danger p-2 fs-6 shadow-sm">MQTT Desconectado</span>
+                <span class="badge bg-success p-2 fs-6 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Sistema Operacional Conectado</span>
+                <button id="darkModeToggle" class="btn btn-outline-secondary btn-sm rounded-circle p-2 d-inline-flex align-items-center justify-content-center"
+                    title="Alternar Modo Escuro" style="width: 38px; height: 38px;">
                     <i id="themeIcon" class="bi bi-moon-stars-fill"></i>
                 </button>
             </div>
         </div>
-    </nav>
-
-    <div class="container pb-5">
-
-        <!-- CABEÇALHO -->
-        <div class="row mb-4 align-items-center g-3">
-            <div class="col-12 col-lg-8">
-                <h2 class="fw-bold mb-1 fs-3 fs-lg-2">
-                    <i class="bi bi-cpu text-primary"></i> Central: Compressor (CP-01)
-                </h2>
-                <p class="text-muted mb-0 small">Controle de estado, telemetria de pressão, vazão e integridade térmica via MQTT.</p>
-            </div>
-            <div class="col-12 col-lg-4 text-lg-end">
-                <span class="badge bg-success p-2 fs-6 shadow-sm w-100 w-lg-auto d-inline-block">
-                    <i class="bi bi-check-circle-fill me-1"></i> Sistema Operacional Conectado
-                </span>
-            </div>
-        </div>
-
+ 
         <!-- CARDS DE TELEMETRIA PRINCIPAL -->
-        <div class="row g-3 mb-4">
-
+        <div class="row g-4 mb-4">
+ 
             <!-- PRESSÃO INTERNA -->
-            <div class="col-12 col-md-6 col-xl-3">
+            <div class="col-md-3">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -73,9 +53,9 @@
                     </div>
                 </div>
             </div>
-
+ 
             <!-- VAZÃO DE AR -->
-            <div class="col-12 col-md-6 col-xl-3">
+            <div class="col-md-3">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -92,9 +72,9 @@
                     </div>
                 </div>
             </div>
-
+ 
             <!-- TEMPERATURA DO ÓLEO -->
-            <div class="col-12 col-md-6 col-xl-3">
+            <div class="col-md-3">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -111,9 +91,9 @@
                     </div>
                 </div>
             </div>
-
-            <!-- DETECÇÃO DE VAZAMENTO -->
-            <div class="col-12 col-md-6 col-xl-3">
+ 
+            <!-- DETECÇÃO DE VAZAMENTO & HORÍMETRO -->
+            <div class="col-md-3">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -127,27 +107,27 @@
                     </div>
                 </div>
             </div>
-
+ 
         </div>
-
+ 
         <!-- SEÇÃO DE CONTROLE E GRÁFICO -->
         <div class="row g-4">
-
+ 
             <!-- PAINEL DE CONTROLE DO COMPRESSOR -->
-            <div class="col-12 col-lg-4">
+            <div class="col-lg-4">
                 <div class="card border-0 shadow-sm h-100 bg-dark text-white">
-                    <div class="card-body d-flex flex-column justify-content-between p-4">
+                    <div class="card-body d-flex flex-column justify-content-between">
                         <div>
                             <div class="d-flex align-items-center justify-content-between mb-4">
                                 <h5 class="fw-bold m-0"><i class="bi bi-cpu text-warning me-2"></i> Painel de Acionamento</h5>
-                                <i id="compIcon" class="bi bi-power fs-2 text-success" style="transition: color 0.3s;"></i>
+                                <i id="compIcon" class="bi bi-power fs-2 text-success" style="transition: color 0.3s; cursor: pointer;" title="Chave Geral: Ligar/Desligar Processo"></i>
                             </div>
-
+ 
                             <div class="mb-3">
                                 <span class="text-light small d-block mb-1">Estado Atual do Motor:</span>
                                 <h3 id="compStatusBadge" class="badge bg-success fs-5 p-2 px-3 m-0">AGUARDANDO...</h3>
                             </div>
-
+ 
                             <!-- CONFIGURAÇÃO DE MODO E BAR -->
                             <div class="mb-3">
                                 <label for="compressorMode" class="form-label text-light small fw-semibold">Modo de Operação:</label>
@@ -155,14 +135,14 @@
                                     <option value="parafuso" selected>Compressor de Parafuso</option>
                                     <option value="alternador">Compressor Alternador</option>
                                 </select>
-
+ 
                                 <label for="targetBarInput" class="form-label text-light small fw-semibold">Meta de Desligamento (BAR):</label>
                                 <div class="input-group input-group-sm">
                                     <input type="number" id="targetBarInput" class="form-control bg-secondary text-white border-0" value="15" min="1" max="30">
                                     <span class="input-group-text bg-secondary text-light border-0">BAR</span>
                                 </div>
                             </div>
-
+ 
                             <!-- CONTROLE DO SECADOR -->
                             <div class="mb-3 p-2 bg-secondary bg-opacity-25 rounded d-flex align-items-center justify-content-between">
                                 <div>
@@ -172,8 +152,8 @@
                                 <button id="dryerToggleBtn" class="btn btn-sm btn-outline-success">Desligar Secador</button>
                             </div>
                         </div>
-
-                        <div class="d-grid gap-2 mt-3">
+ 
+                        <div class="d-grid gap-2">
                             <button id="compToggleBtn" class="btn btn-danger btn-lg fw-bold shadow-sm">
                                 <i class="bi bi-stop-circle me-1"></i> Desligar Compressor
                             </button>
@@ -181,24 +161,24 @@
                     </div>
                 </div>
             </div>
-
+ 
             <!-- GRÁFICO DE PRESSÃO E VAZÃO EM TEMPO REAL -->
-            <div class="col-12 col-lg-8">
+            <div class="col-lg-8">
                 <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header py-3 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
-                        <h5 class="card-title fw-bold m-0 fs-6 fs-sm-5"><i class="bi bi-graph-up-arrow text-primary me-2"></i> Pressão (Bar) vs Vazão (m³/h)</h5>
-                        <span class="badge bg-body-secondary text-body border align-self-start align-self-sm-auto">Tempo Real MQTT</span>
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="card-title fw-bold m-0"><i class="bi bi-graph-up-arrow text-primary me-2"></i> Dinâmica de Pressão (Bar) vs Vazão (m³/h)</h5>
+                        <span class="badge bg-body-secondary text-body border">Tempo Real MQTT</span>
                     </div>
                     <div class="card-body d-flex flex-column justify-content-center">
-                        <div style="position: relative; height: 260px; width: 100%;">
+                        <div style="height: 250px;">
                             <canvas id="compressorChart"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
-
+ 
         </div>
-
+ 
         <!-- SEÇÃO DE COMANDOS AUXILIARES E MANUTENÇÃO -->
         <div class="row g-4 mt-1">
             <div class="col-12">
@@ -208,17 +188,17 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-12 col-md-4">
+                            <div class="col-md-4">
                                 <button class="btn btn-outline-primary w-100 py-2 fw-semibold" id="btnPurge">
                                     <i class="bi bi-droplet-fill me-1"></i> Executar Purga de Condensado
                                 </button>
                             </div>
-                            <div class="col-12 col-md-4">
+                            <div class="col-md-4">
                                 <button class="btn btn-outline-warning w-100 py-2 fw-semibold" id="btnValveTest">
                                     <i class="bi bi-shield-exclamation me-1"></i> Testar Válvula de Segurança
                                 </button>
                             </div>
-                            <div class="col-12 col-md-4">
+                            <div class="col-md-4">
                                 <button class="btn btn-outline-danger w-100 py-2 fw-semibold" id="btnSimulateLeak">
                                     <i class="bi bi-exclamation-triangle me-1"></i> Simular Sensor de Vazamento
                                 </button>
@@ -231,37 +211,34 @@
                 </div>
             </div>
         </div>
-
+ 
     </div>
-
+ 
     <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- SCRIPT DE TEMA (MODO ESCURO/CLARO) -->
+ 
+    <!-- SCRIPT DE TEMA -->
     <script>
         const darkModeToggle = document.getElementById('darkModeToggle');
         const themeIcon = document.getElementById('themeIcon');
         const htmlElement = document.documentElement;
-
+ 
         function setTheme(theme) {
             htmlElement.setAttribute('data-bs-theme', theme);
             localStorage.setItem('theme', theme);
-            // Altera o ícone do botão dependendo do tema ativo
             themeIcon.className = theme === 'dark' ? "bi bi-sun-fill text-warning" : "bi bi-moon-stars-fill";
         }
-
-        // Carrega o tema salvo no navegador ou define 'light' como padrão
+ 
         const savedTheme = localStorage.getItem('theme') || 'light';
         setTheme(savedTheme);
-
-        // Evento de clique no botão de alternância
+ 
         darkModeToggle.addEventListener('click', () => {
             const currentTheme = htmlElement.getAttribute('data-bs-theme');
             setTheme(currentTheme === 'light' ? 'dark' : 'light');
         });
     </script>
-
+ 
     <!-- CONFIGURAÇÃO DO GRÁFICO -->
     <script>
         const ctxComp = document.getElementById('compressorChart').getContext('2d');
@@ -300,40 +277,93 @@
             }
         });
     </script>
-
+ 
     <!-- LÓGICA MQTT E ATUALIZAÇÃO DA INTERFACE -->
     <script>
+        // Configuração do Broker MQTT (ex: HiveMQ public broker via WebSocket)
         const MQTT_BROKER = 'wss://broker.hivemq.com:8884/mqtt';
         const TOPIC_TELEMETRIA = 'optigrid/compressor/cp01/telemetria';
         const TOPIC_COMANDO = 'optigrid/compressor/cp01/comando';
-
+ 
         const mqttStatusBadge = document.getElementById('mqttStatusBadge');
-        
+       
+        // Elementos de UI
         const compToggleBtn = document.getElementById('compToggleBtn');
         const compStatusBadge = document.getElementById('compStatusBadge');
         const compIcon = document.getElementById('compIcon');
         const compressorMode = document.getElementById('compressorMode');
         const targetBarInput = document.getElementById('targetBarInput');
         const faixaPressaoText = document.getElementById('faixaPressaoText');
-
+ 
         const dryerToggleBtn = document.getElementById('dryerToggleBtn');
         const dryerStatusText = document.getElementById('dryerStatusText');
-
+ 
+        // Controle da Chave Geral do Painel de Acionamento
+        let painelHabilitado = true;
+ 
+        function atualizarEstadoPainel() {
+            compIcon.className = painelHabilitado ? "bi bi-power fs-2 text-success" : "bi bi-power fs-2 text-danger";
+            compressorMode.disabled = !painelHabilitado;
+            targetBarInput.disabled = !painelHabilitado;
+            dryerToggleBtn.disabled = !painelHabilitado;
+            compToggleBtn.disabled = !painelHabilitado;
+        }
+ 
+        // Atualiza a cor e o texto do botão principal conforme o estado do compressor
+        function atualizarBotaoCompressor(ligado) {
+            if (ligado) {
+                compToggleBtn.className = "btn btn-danger btn-lg fw-bold shadow-sm";
+                compToggleBtn.innerHTML = '<i class="bi bi-stop-circle me-1"></i> Desligar Compressor';
+            } else {
+                compToggleBtn.className = "btn btn-success btn-lg fw-bold shadow-sm";
+                compToggleBtn.innerHTML = '<i class="bi bi-play-circle me-1"></i> Ligar Compressor';
+            }
+        }
+ 
+        // Interrompe imediatamente todo o processo ativo ao desligar a chave geral
+        function interromperTodoProcesso() {
+            enviarComandoMQTT("toggle_compressor", "desligar");
+            enviarComandoMQTT("toggle_secador", "desligar_secador");
+            enviarComandoMQTT("rele_2", "desligar");
+ 
+            compStatusBadge.textContent = "DESLIGADO";
+            compStatusBadge.className = "badge bg-secondary fs-5 p-2 px-3 m-0";
+            atualizarBotaoCompressor(false);
+ 
+            dryerStatusText.textContent = "Desligado";
+            dryerStatusText.className = "text-danger small";
+            dryerToggleBtn.textContent = "Ligar Secador";
+            dryerToggleBtn.className = "btn btn-sm btn-outline-danger";
+        }
+ 
+        compIcon.addEventListener('click', () => {
+            painelHabilitado = !painelHabilitado;
+            atualizarEstadoPainel();
+ 
+            if (!painelHabilitado) {
+                interromperTodoProcesso();
+                showFeedback("Chave geral desligada: todo o processo foi interrompido e o painel foi bloqueado.");
+            } else {
+                enviarComandoMQTT("rele_2", "ligar");
+                showFeedback("Chave geral ligada: painel de acionamento liberado para operação.");
+            }
+        });
+ 
         const pressaoDisplay = document.getElementById('pressaoDisplay');
         const pressaoBar = document.getElementById('pressaoBar');
         const vazaoDisplay = document.getElementById('vazaoDisplay');
         const vazaoBar = document.getElementById('vazaoBar');
         const tempDisplay = document.getElementById('tempDisplay');
         const tempBar = document.getElementById('tempBar');
-
+ 
         const leakIconContainer = document.getElementById('leakIconContainer');
         const leakIcon = document.getElementById('leakIcon');
         const leakStatusText = document.getElementById('leakStatusText');
         const leakSubText = document.getElementById('leakSubText');
-        
+       
         const actionFeedback = document.getElementById('actionFeedback');
         const feedbackText = document.getElementById('feedbackText');
-
+ 
         function showFeedback(msg) {
             feedbackText.textContent = msg;
             actionFeedback.classList.remove('d-none');
@@ -341,13 +371,14 @@
                 actionFeedback.classList.add('d-none');
             }, 5000);
         }
-
+ 
+        // Conexão MQTT
         console.log("Conectando ao broker MQTT...");
         const client = mqtt.connect(MQTT_BROKER);
-
+ 
         client.on('connect', () => {
             mqttStatusBadge.textContent = "MQTT Conectado";
-            mqttStatusBadge.className = "badge bg-success px-3 py-2";
+            mqttStatusBadge.className = "badge bg-success p-2 fs-6 shadow-sm";
             console.log("Conectado com sucesso ao broker MQTT!");
             client.subscribe(TOPIC_TELEMETRIA, (err) => {
                 if (!err) {
@@ -355,41 +386,51 @@
                 }
             });
         });
-
+ 
         client.on('error', (err) => {
             mqttStatusBadge.textContent = "Erro MQTT";
-            mqttStatusBadge.className = "badge bg-danger px-3 py-2";
+            mqttStatusBadge.className = "badge bg-danger p-2 fs-6 shadow-sm";
             console.log("Erro de conexão MQTT: ", err);
         });
-
+ 
+        // Recebimento de mensagens via MQTT (Telemetria do ESP32 / Backend)
         client.on('message', (topic, payload) => {
             if (topic === TOPIC_TELEMETRIA) {
                 try {
                     const data = JSON.parse(payload.toString());
-                    
+                   
+                    // Atualiza Pressão
                     let pressao = data.pressao || 0;
                     let maxBar = parseFloat(targetBarInput.value) || 15;
                     pressaoDisplay.innerHTML = `${pressao.toFixed(1)} <span class="fs-5 text-muted">Bar</span>`;
                     pressaoBar.style.width = Math.min((pressao / maxBar) * 100, 100) + '%';
-
+ 
+                    // Atualiza Vazão
                     let vazao = data.vazao || 0;
                     vazaoDisplay.innerHTML = `${vazao.toFixed(1)} <span class="fs-5 text-muted">m³/h</span>`;
                     vazaoBar.style.width = Math.min((vazao / 60) * 100, 100) + '%';
-
+ 
+                    // Atualiza Temperatura
                     let temp = data.temperatura || 25;
                     tempDisplay.innerHTML = `${temp.toFixed(1)} <span class="fs-5 text-muted">°C</span>`;
                     tempBar.style.width = Math.min((temp / 95) * 100, 100) + '%';
-
-                    if (data.statusCompressor) {
+ 
+                    // Atualiza Status do Compressor e cor/texto do botão
+                    if (!painelHabilitado) {
+                        compStatusBadge.textContent = "DESLIGADO";
+                        compStatusBadge.className = "badge bg-secondary fs-5 p-2 px-3 m-0";
+                        atualizarBotaoCompressor(false);
+                    } else if (data.statusCompressor) {
                         compStatusBadge.textContent = data.statusCompressor;
                         compStatusBadge.className = "badge bg-success fs-5 p-2 px-3 m-0";
-                        compIcon.className = "bi bi-power fs-2 text-success";
+                        atualizarBotaoCompressor(true);
                     } else {
                         compStatusBadge.textContent = "DESLIGADO";
                         compStatusBadge.className = "badge bg-secondary fs-5 p-2 px-3 m-0";
-                        compIcon.className = "bi bi-power fs-2 text-danger";
+                        atualizarBotaoCompressor(false);
                     }
-
+ 
+                    // Atualiza Vazamento
                     if (data.vazamento) {
                         leakIconContainer.className = "bg-danger bg-opacity-10 p-2 rounded-circle text-danger";
                         leakIcon.className = "bi bi-exclamation-triangle-fill fs-4";
@@ -403,7 +444,8 @@
                         leakStatusText.className = "text-success fw-bold mb-1";
                         leakSubText.innerHTML = '<i class="bi bi-check-circle"></i> Rede pressurizada estável';
                     }
-
+ 
+                    // Atualiza o Gráfico em Tempo Real
                     const horaAtual = new Date().toLocaleTimeString();
                     if (compressorChart.data.labels.length > 10) {
                         compressorChart.data.labels.shift();
@@ -414,15 +456,21 @@
                     compressorChart.data.datasets[0].data.push(pressao);
                     compressorChart.data.datasets[1].data.push(vazao);
                     compressorChart.update();
-
+ 
                 } catch (e) {
                     console.error("Erro ao processar JSON da mensagem MQTT:", e);
                 }
             }
         });
-
+ 
+        // Função auxiliar para enviar comandos via MQTT
         function enviarComandoMQTT(acao, valor) {
-            const payload = JSON.stringify({ comando: acao, valor: valor, timestamp: Date.now() });
+            const payload = JSON.stringify({
+                comando: acao,
+                valor: valor,
+                modo: compressorMode.value,
+                timestamp: Date.now()
+            });
             client.publish(TOPIC_COMANDO, payload, {}, (err) => {
                 if (err) {
                     showFeedback("Erro ao enviar comando MQTT.");
@@ -431,29 +479,40 @@
                 }
             });
         }
-
+ 
+        // Event Listeners para Enviar Comandos
         compToggleBtn.addEventListener('click', function () {
-            const estadoDesejado = compStatusBadge.textContent.includes("DESLIGADO") ? "ligar" : "desligar";
+            if (!painelHabilitado) return;
+            const querLigar = compToggleBtn.classList.contains('btn-success');
+            const estadoDesejado = querLigar ? "ligar" : "desligar";
             enviarComandoMQTT("toggle_compressor", estadoDesejado);
+            atualizarBotaoCompressor(querLigar);
         });
-
+ 
         dryerToggleBtn.addEventListener('click', () => {
-            const estadoSecador = dryerStatusText.textContent === "Ligado" ? "desligar_secador" : "ligar_secador";
+            if (!painelHabilitado) return;
+            const desligando = dryerStatusText.textContent === "Ligado";
+            const estadoSecador = desligando ? "desligar_secador" : "ligar_secador";
             enviarComandoMQTT("toggle_secador", estadoSecador);
+ 
+            dryerStatusText.textContent = desligando ? "Desligado" : "Ligado";
+            dryerStatusText.className = desligando ? "text-danger small" : "text-success small";
+            dryerToggleBtn.textContent = desligando ? "Ligar Secador" : "Desligar Secador";
+            dryerToggleBtn.className = desligando ? "btn btn-sm btn-outline-danger" : "btn btn-sm btn-outline-success";
         });
-
+ 
         document.getElementById('btnPurge').addEventListener('click', () => {
             enviarComandoMQTT("executar_purga", true);
         });
-
+ 
         document.getElementById('btnValveTest').addEventListener('click', () => {
             enviarComandoMQTT("testar_valvula", true);
         });
-
+ 
         document.getElementById('btnSimulateLeak').addEventListener('click', () => {
             enviarComandoMQTT("simular_vazamento", true);
         });
     </script>
 </body>
-
+ 
 </html>
